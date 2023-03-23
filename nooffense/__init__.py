@@ -1,1 +1,1 @@
-from preprocess import TextProcessor
+from .preprocess import TextProcessor
