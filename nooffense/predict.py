@@ -1,41 +1,50 @@
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding
 from .utils.preprocess import quick_df_clean
+import glob
 
 
 class DFPredictor:
-    def __init__(self, df_path: str, model_path: str):
-        self.df = pd.read_csv(df_path)
+    def __init__(self, df_path: str, model_path: str, device: str = 'cuda'):
+        self.df = pd.read_csv(df_path, sep='|')
         self.df['text'] = self.df['text'].apply(lambda x: quick_df_clean(x))
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_path,
-                                                                        problem_type="single_label_classification",
-                                                                        id2label={0: 'INSULT', 1: 'OTHER',
-                                                                                  2: 'PROFANITY', 3: 'RACIST',
-                                                                                  4: 'SEXIST'},
-                                                                        label2id={'INSULT': 0, 'OTHER': 1,
-                                                                                  'PROFANITY': 2, 'RACIST': 3,
-                                                                                  'SEXIST': 4},
-                                                                        num_labels=5,
-                                                                        output_hidden_states=False,
-                                                                        ignore_mismatched_sizes=True
+        self.id2label = {0: 'INSULT', 1: 'OTHER', 2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
+        self.label2id = {v: k for k, v in self.id2label.items()}
+        self.models = glob.glob(model_path + "/*", recursive=False)
+        self.device = device
 
-                                                                        )
-        self.dataset = PredictDataset(self.df, self.tokenizer, max_len=64)
-        self.data_collator = DataCollatorWithPadding(self.tokenizer, padding="longest")
-        self.dataloader = DataLoader(pd, batch_size=8, shuffle=False, collate_fn=self.data_collator)
     @property
     def predict_df(self):
-        predictions = []
-        for encoding in tqdm(self.dataloader):
-            logits = self.model(**encoding).logits
-            preds = torch.argmax(logits, axis=1)
-            predictions.extend(preds.tolist())
-        return predictions
-
+        final_preds = []
+        for model_name in self.models:
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            dataset = PredictDataset(self.df, tokenizer, max_len=64)
+            data_collator = DataCollatorWithPadding(tokenizer, padding="longest")
+            dataloader = DataLoader(dataset, batch_size=8, shuffle=False, collate_fn=data_collator)
+            predictions = []
+            model = AutoModelForSequenceClassification.from_pretrained(model_name,
+                                                                       problem_type="single_label_classification",
+                                                                       id2label=self.id2label,
+                                                                       label2id=self.label2id,
+                                                                       num_labels=5,
+                                                                       output_hidden_states=False,
+                                                                       ignore_mismatched_sizes=True
+                                                                       ).to(self.device)
+            for encoding in tqdm(dataloader):
+                logits = model(encoding['input_ids'].to(self.device), encoding['token_type_ids'].to(self.device),
+                               encoding['attention_mask'].to(self.device)).logits
+                predictions.extend(logits.tolist())
+            final_preds.append(predictions)
+        new_df = self.df.copy()
+        new_df['is_offensive'] = 0
+        new_df.loc[:, "target"] = np.argmax(np.mean(final_preds, axis=0), axis=1)
+        new_df.loc[:, 'is_offensive'] = np.where(new_df.target == 1, 0, 1)
+        new_df.loc[:, "target"] = new_df['target'].map(self.id2label)
+        return new_df
 
 
 class PredictDataset(torch.utils.data.Dataset):
