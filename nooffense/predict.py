@@ -7,16 +7,19 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, Data
 from .utils.preprocess import quick_df_clean
 import glob
 
+import os
+os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
+
 
 class DFPredictor:
-    def __init__(self, df_path: str, model_path: str, device: str = 'cuda'):
+    def __init__(self, df_path: str, model_path: str, device:str='cuda'):
         self.df = pd.read_csv(df_path, sep='|')
         self.df['text'] = self.df['text'].apply(lambda x: quick_df_clean(x))
-        self.id2label = {0: 'INSULT', 1: 'OTHER', 2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
-        self.label2id = {v: k for k, v in self.id2label.items()}
-        self.models = glob.glob(model_path + "/*", recursive=False)
+        print
+        self.id2label = {0: 'INSULT', 1: 'OTHER',2: 'PROFANITY', 3: 'RACIST',4: 'SEXIST'}
+        self.label2id = {v:k for k,v in self.id2label.items()}
+        self.models = glob.glob(model_path+"/*", recursive=False)
         self.device = device
-
     @property
     def predict_df(self):
         final_preds = []
@@ -27,24 +30,27 @@ class DFPredictor:
             dataloader = DataLoader(dataset, batch_size=8, shuffle=False, collate_fn=data_collator)
             predictions = []
             model = AutoModelForSequenceClassification.from_pretrained(model_name,
-                                                                       problem_type="single_label_classification",
-                                                                       id2label=self.id2label,
-                                                                       label2id=self.label2id,
-                                                                       num_labels=5,
-                                                                       output_hidden_states=False,
-                                                                       ignore_mismatched_sizes=True
-                                                                       ).to(self.device)
+                                                               problem_type="single_label_classification",
+                                                               id2label=self.id2label,
+                                                               label2id=self.label2id,
+                                                               num_labels=5,
+                                                               output_hidden_states=False,
+                                                               ignore_mismatched_sizes=True
+
+                                                               ).to(self.device)
+            model.eval()
             for encoding in tqdm(dataloader):
-                logits = model(encoding['input_ids'].to(self.device), encoding['token_type_ids'].to(self.device),
-                               encoding['attention_mask'].to(self.device)).logits
-                predictions.extend(logits.tolist())
-            final_preds.append(predictions)
+                output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(self.device), encoding['token_type_ids'].to(self.device))
+                predictions.append(output.logits.detach().cpu())
+            final_preds.append(torch.softmax(torch.cat(predictions), dim=-1))
+        final_preds = np.mean((torch.stack(final_preds)).numpy(), axis=0)
         new_df = self.df.copy()
-        new_df['is_offensive'] = 0
-        new_df.loc[:, "target"] = np.argmax(np.mean(final_preds, axis=0), axis=1)
-        new_df.loc[:, 'is_offensive'] = np.where(new_df.target == 1, 0, 1)
-        new_df.loc[:, "target"] = new_df['target'].map(self.id2label)
+        new_df['is_offensive']  = 0
+        new_df.loc[:, "target"] = np.argmax(final_preds, axis=-1)
+        new_df.loc[:, 'is_offensive'] = np.where(new_df.target ==1, 0, 1)
+        new_df.loc[:, "target"] =  new_df['target'].map(self.id2label)
         return new_df
+
 
 
 class PredictDataset(torch.utils.data.Dataset):
