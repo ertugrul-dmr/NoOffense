@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding
-from .utils.preprocess import quick_df_clean
+from preprocess import quick_df_clean
 import glob
 
 import os
