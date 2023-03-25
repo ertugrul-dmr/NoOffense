@@ -20,7 +20,7 @@ class DFPredictor:
         if ensemble:
             self.models = glob.glob(model_path+"/*", recursive=False)
         else:
-            self.models = list(model_path)
+            self.models = [model_path]
         self.device = device
     @property
     def predict_df(self):
