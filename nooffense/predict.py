@@ -13,12 +13,12 @@ os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 
 class DFPredictor:
     def __init__(self, df_path: str, model_path: str, device:str='cuda'):
-        self.dirname = os.path.dirname(__file__)
-        self.df = pd.read_csv(os.path.join(self.dirname, df_path), sep='|')
+        # self.dirname = os.path.dirname(__file__)
+        self.df = pd.read_csv(df_path, sep='|')
         self.df['text'] = self.df['text'].apply(lambda x: quick_df_clean(x))
         self.id2label = {0: 'INSULT', 1: 'OTHER',2: 'PROFANITY', 3: 'RACIST',4: 'SEXIST'}
         self.label2id = {v:k for k,v in self.id2label.items()}
-        self.models = glob.glob(os.path.join(self.dirname, model_path)+"/*", recursive=False)
+        self.models = glob.glob(model_path+"/*", recursive=False)
         self.device = device
     @property
     def predict_df(self):
