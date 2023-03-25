@@ -1,3 +1,3 @@
 # from utils import preprocess
 from . import predict
-from . import preprocess
+from .utils import preprocess
