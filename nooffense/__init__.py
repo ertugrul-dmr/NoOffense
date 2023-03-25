@@ -1,3 +1,3 @@
 # from utils import preprocess
-from . import predict
+from .predict import DFPredictor
 # from .utils import preprocess
