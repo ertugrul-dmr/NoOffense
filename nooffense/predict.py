@@ -3,8 +3,8 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding
-from .preprocess import quick_df_clean
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding, FillMaskPipeline, AutoModelForMaskedImageModeling
+from .utils import PredictDataset, quick_clean
 import glob
 
 import os
@@ -15,7 +15,8 @@ os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 class DFPredictor:
     def __init__(self, df_path: str, model_path: str, device: str = 'cuda', ensemble=True):
         self.data = pd.read_csv(df_path, sep='|')
-        self.data['text'] = self.data['text'].apply(lambda x: quick_df_clean(x))
+        self.data['text'] = self.data['text'].apply(
+            lambda x: quick_clean(x))
         self.id2label = {0: 'INSULT', 1: 'OTHER',
                          2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
         self.label2id = {v: k for k, v in self.id2label.items()}
@@ -25,9 +26,10 @@ class DFPredictor:
             self.models = [model_path]
         self.device = device
 
-    def predict_df(self, save_csv=False):
+    def predict_df(self, save_csv=False, progress_bar=True):
 
-        print(f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
+        print(
+            f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
         final_preds = []
         for model_name in self.models:
             print(f"\n\t Predicting for {model_name}")
@@ -47,7 +49,7 @@ class DFPredictor:
                                                                        ignore_mismatched_sizes=True
                                                                        ).to(self.device)
             model.eval()
-            for encoding in tqdm(dataloader):
+            for encoding in tqdm(dataloader, disable=progress_bar):
                 output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
                     self.device), encoding['token_type_ids'].to(self.device))
                 predictions.append(output.logits.detach().cpu())
@@ -67,7 +69,7 @@ class Predictor:
     def __init__(self, texts: list, model_path: str, device: str = 'cuda', ensemble=True):
 
         self.data = texts
-        self.data = [quick_df_clean(text) for text in texts]
+        self.data = [quick_clean(text) for text in texts]
         self.id2label = {0: 'INSULT', 1: 'OTHER',
                          2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
         self.label2id = {v: k for k, v in self.id2label.items()}
@@ -77,8 +79,9 @@ class Predictor:
             self.models = [model_path]
         self.device = device
 
-    def predict(self):
-        print(f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
+    def predict(self, progress_bar=False):
+        print(
+            f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
         final_preds = []
         for model_name in self.models:
             print(f"\n\t Predicting for {model_name}")
@@ -98,7 +101,7 @@ class Predictor:
                                                                        ignore_mismatched_sizes=True
                                                                        ).to(self.device)
             model.eval()
-            for encoding in tqdm(dataloader):
+            for encoding in tqdm(dataloader, disable=progress_bar):
                 output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
                     self.device), encoding['token_type_ids'].to(self.device))
                 predictions.append(output.logits.detach().cpu())
@@ -109,24 +112,12 @@ class Predictor:
         return {"probas": probas, "predictions": predictions, "predicted_labels": predicted_labels}
 
 
-class PredictDataset(torch.utils.data.Dataset):
-    def __init__(self, data, tokenizer, max_len=64):
-        self.data = data
-        self.tokenizer = tokenizer
-        self.max_len = max_len
+class MaskPredictor:
+    def __init__(self, model_path) -> None:
+        self.model = AutoModelForMaskedImageModeling.from_pretrained(model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        if isinstance(self.data, pd.DataFrame):
-            row = self.data.iloc[idx]
-            text = row.text
-        else:
-            text = self.data[idx]
-
-        encoding = self.tokenizer(
-            text, max_length=self.max_len, truncation=True)
-        encoding = {key: torch.tensor(val, dtype=torch.int64)
-                    for key, val in encoding.items()}
-        return dict(encoding)
+        self.pipe = FillMaskPipeline(model=self.model, tokenizer=self.tokenizer)
+    def mask_filler(self, text):
+        filled = self.pipe(text)
+        return text
