@@ -1,4 +1,5 @@
 from .predict import DFPredictor
 from .predict import Predictor
+from .predict import MaskPredictor
 
-from .preprocess import TextProcessor
+from .utils import TextProcessor, PredictDataset

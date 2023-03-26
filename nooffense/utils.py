@@ -1,6 +1,32 @@
 import re
 import string
 
+import torch
+import pandas as pd
+
+
+class PredictDataset(torch.utils.data.Dataset):
+    def __init__(self, data, tokenizer, max_len=64):
+        self.data = data
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        if isinstance(self.data, pd.DataFrame):
+            row = self.data.iloc[idx]
+            text = row.text
+        else:
+            text = self.data[idx]
+
+        encoding = self.tokenizer(
+            text, max_length=self.max_len, truncation=True)
+        encoding = {key: torch.tensor(val, dtype=torch.int64)
+                    for key, val in encoding.items()}
+        return dict(encoding)
+
 
 class TextProcessor:
     def __init__(self):
@@ -108,7 +134,7 @@ class TextProcessor:
         return self.remove_extra_whitespaces(text)
 
 
-def quick_df_clean(text):
+def quick_clean(text):
     cleaner = TextProcessor()
     cleaned_text = cleaner.clean_text(text, remove_url=False, remove_html=False, remove_emoji=False, remove_punct=True, remove_digits=False, remove_hash_ment=False, remove_single_chars=True)
     return cleaned_text

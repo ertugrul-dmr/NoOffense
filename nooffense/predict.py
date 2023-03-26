@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding, FillMaskPipeline, AutoModelForMaskedImageModeling
-from .utils import PredictDataset, quick_clean
+from .utils import quick_clean, PredictDataset
 import glob
 
 import os
