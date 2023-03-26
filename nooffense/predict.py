@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding, FillMaskPipeline, AutoModelForMaskedImageModeling
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding, FillMaskPipeline, AutoModelForMaskedLM
 from .utils import quick_clean, PredictDataset
 import glob
 
@@ -114,7 +114,7 @@ class Predictor:
 
 class MaskPredictor:
     def __init__(self, model_path) -> None:
-        self.model = AutoModelForMaskedImageModeling.from_pretrained(model_path)
+        self.model = AutoModelForMaskedLM.from_pretrained(model_path)
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         self.pipe = FillMaskPipeline(model=self.model, tokenizer=self.tokenizer)
