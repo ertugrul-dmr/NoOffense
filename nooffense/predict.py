@@ -120,4 +120,4 @@ class MaskPredictor:
         self.pipe = FillMaskPipeline(model=self.model, tokenizer=self.tokenizer)
     def mask_filler(self, text):
         filled = self.pipe(text)
-        return text
+        return filled
