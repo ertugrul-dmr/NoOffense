@@ -13,10 +13,8 @@ os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 
 
 class DFPredictor:
-    def __init__(self, df_path: str, model_path: str, device: str = 'cuda', ensemble=True):
-        self.data = pd.read_csv(df_path, sep='|')
-        self.data['text'] = self.data['text'].apply(
-            lambda x: quick_clean(x))
+    def __init__(self, model_path: str, device: str = 'cuda', ensemble=True):
+
         self.id2label = {0: 'INSULT', 1: 'OTHER',
                          2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
         self.label2id = {v: k for k, v in self.id2label.items()}
@@ -26,15 +24,21 @@ class DFPredictor:
             self.models = [model_path]
         self.device = device
 
-    def predict_df(self, save_csv=False, progress_bar=True):
+    def predict_df(self, df_path: str, save_csv=False, progress_bar=True):
 
         print(
             f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
+
+        data = pd.read_csv(df_path, sep='|')
+        data['text'] = self.data['text'].apply(
+            lambda x: quick_clean(x))
+
+
         final_preds = []
         for model_name in self.models:
             print(f"\n\t Predicting for {model_name}")
             tokenizer = AutoTokenizer.from_pretrained(model_name)
-            dataset = PredictDataset(self.data, tokenizer, max_len=64)
+            dataset = PredictDataset(data, tokenizer, max_len=64)
             data_collator = DataCollatorWithPadding(
                 tokenizer, padding="longest")
             dataloader = DataLoader(
@@ -55,7 +59,7 @@ class DFPredictor:
                 predictions.append(output.logits.detach().cpu())
             final_preds.append(torch.softmax(torch.cat(predictions), dim=-1))
         final_preds = np.mean((torch.stack(final_preds)).numpy(), axis=0)
-        new_df = self.data.copy()
+        new_df = data.copy()
         new_df['is_offensive'] = 0
         new_df.loc[:, "target"] = np.argmax(final_preds, axis=-1)
         new_df.loc[:, 'is_offensive'] = np.where(new_df.target == 1, 0, 1)
@@ -66,10 +70,8 @@ class DFPredictor:
 
 
 class Predictor:
-    def __init__(self, texts: list, model_path: str, device: str = 'cuda', ensemble=True):
+    def __init__(self, model_path: str, device: str = 'cuda', ensemble=False):
 
-        self.data = texts
-        self.data = [quick_clean(text) for text in texts]
         self.id2label = {0: 'INSULT', 1: 'OTHER',
                          2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
         self.label2id = {v: k for k, v in self.id2label.items()}
@@ -79,14 +81,18 @@ class Predictor:
             self.models = [model_path]
         self.device = device
 
-    def predict(self, progress_bar=False):
+    def predict(self, texts: list, progress_bar=False):
         print(
             f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
+
+        data = texts
+        data = [quick_clean(text) for text in texts]
+
         final_preds = []
         for model_name in self.models:
             print(f"\n\t Predicting for {model_name}")
             tokenizer = AutoTokenizer.from_pretrained(model_name)
-            dataset = PredictDataset(self.data, tokenizer, max_len=64)
+            dataset = PredictDataset(data, tokenizer, max_len=64)
             data_collator = DataCollatorWithPadding(
                 tokenizer, padding="longest")
             dataloader = DataLoader(
