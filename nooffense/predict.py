@@ -27,7 +27,7 @@ class DFPredictor:
     def predict_df(self, df_path: str, save_csv=False, progress_bar=True):
 
         print(
-            f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
+            f"Predicting for given model weights...\n\tTotal Number of Models: {len(self.models)}")
 
         data = pd.read_csv(df_path, sep='|')
         data['text'] = self.data['text'].apply(
