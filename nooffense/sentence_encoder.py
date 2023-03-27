@@ -40,16 +40,18 @@ class SentenceEncoder:
 
         predictions = []
         model = AutoModel.from_pretrained(self.model,
-                                          output_attentions=True
+
                                                                    ).to(self.device)
         model.eval()
         for encoding in tqdm(dataloader, disable=not progress_bar):
             output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
                 self.device), encoding['token_type_ids'].to(self.device))
 
-            mean_pool = self.pool(output.last_hidden_state, output.attentions)
+
+            mean_pool = self.pool(output.last_hidden_state, encoding['attention_mask'].to(
+                self.device))
 
 
             predictions.append(mean_pool.detach().cpu())
-        encodings = np.stack(predictions)
+        encodings = np.concatenate(predictions, axis=0)
         return encodings
