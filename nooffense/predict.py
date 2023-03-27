@@ -27,7 +27,7 @@ class DFPredictor:
     def predict_df(self, df_path: str, save_csv=False, progress_bar=True):
 
         print(
-            f"Predicting for given model weights...\n\tTotal Number of Models: {len(self.models)}")
+            f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
 
         data = pd.read_csv(df_path, sep='|')
         data['text'] = self.data['text'].apply(
@@ -53,7 +53,7 @@ class DFPredictor:
                                                                        ignore_mismatched_sizes=True
                                                                        ).to(self.device)
             model.eval()
-            for encoding in tqdm(dataloader, disable=progress_bar):
+            for encoding in tqdm(dataloader, disable=not progress_bar):
                 output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
                     self.device), encoding['token_type_ids'].to(self.device))
                 predictions.append(output.logits.detach().cpu())
@@ -85,7 +85,6 @@ class Predictor:
         print(
             f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
 
-        data = texts
         data = [quick_clean(text) for text in texts]
 
         final_preds = []
@@ -107,7 +106,7 @@ class Predictor:
                                                                        ignore_mismatched_sizes=True
                                                                        ).to(self.device)
             model.eval()
-            for encoding in tqdm(dataloader, disable=progress_bar):
+            for encoding in tqdm(dataloader, disable=not progress_bar):
                 output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
                     self.device), encoding['token_type_ids'].to(self.device))
                 predictions.append(output.logits.detach().cpu())
