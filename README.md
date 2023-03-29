@@ -1,30 +1,31 @@
 # NoOffense
-A smart and fast offensive language detector for Turkish using transformers.
+This package provides a smart and fast offensive language detection tool for Turkish, which is based on the transformers technology.
 
-This package is built by **Overfit-GM** team as a part of the **Türkiye Açık Kaynak Platformu** NLP challenge.
+The **Overfit-GM** team developed this package as a part of the **Türkiye Açık Kaynak Platformu** NLP challenge.
 
 
-## How to Install
+## Installation Instructions
+To install this package, simply run the following command in your Python environment:
 
 ```python
 pip install git+https://github.com/ertugrul-dmr/NoOffense.git
 ```
-
+This command will install the package directly from the GitHub repository.
 # Usage
 
-NoOffense supports multiple tasks in your standard NLP tasks, especially focused on Offensive Language in Turkish texts.
+NoOffense is a versatile tool that supports multiple standard NLP tasks, with a particular focus on detecting offensive language in Turkish texts.
 
-# Get Predictions
-You can feed your list of texts and get predictions easily with NoOffense:
+# Getting Predictions
+You can easily obtain predictions for a list of texts by using NoOffense as follows:
 ```python
 from noofense import Predictor
 
 # Predictor applies some text cleaning&preps internally
-# In case of multiple trained models, use ensemble=True,
-# and give path to weights folder
+# In case of multiple trained models use list of model paths,
+# and NoOffense will yield ensemble results internally
 # you can use gpu support by setting device for faster inference
 
-clf = Predictor(model_path='path_to_your_model_weight_folder', ensemble=True, device='cuda')
+clf = Predictor(model_path='path_to_your_model_weight_folder', device='cuda')
 predictions= clf.predict(['sen ne gerizekalısın ya'], progress_bar=False)
 
 # Code above will return dict contains these keys:
@@ -32,20 +33,20 @@ predictions= clf.predict(['sen ne gerizekalısın ya'], progress_bar=False)
 # ['predictions']: label encoding for each predicted class
 # ['predicted_labels']: str label mappings for each class, INSULT, Racist etc.
 ```
-NoOffense supports pandas dataframe predictions too:
+NoOffense also supports making predictions on Pandas dataframes:
 
-It expects column named "text" to make predictions.
+It expects a column named "text" to make predictions.
 ```python
 from noofense import DFPredictor
 
-clf = DFPredictor(model_path='path_to_your_model_weights_folder', ensemble=True, device='cpu')
+clf = DFPredictor(model_path='path_to_your_model_weights_folder', device='cpu')
 predicted_df = clf.predict_df(df_path="path_to_your_csv_file", save_csv=False, progress_bar=True)
 # Code above will return a copy of original dataframe with predictions.
 ```
 
 ## Fill Masks
 
-NoOffense models trained in self supervised fashion with large Turkish offensive text corpus. These models then finetuned for text classification task, but byproduct of our Masked Language Model training you can use it as fill mask pipe too!
+NoOffense models are trained in a self-supervised fashion using a large Turkish offensive text corpus. These models are then fine-tuned for text classification tasks. However, as a byproduct of our Masked Language Model training, you can also use it as a fill-mask pipe!
 ```python
 from nooffense import MaskPredictor
 model = MaskPredictor("path_to_your_model_weight_folder")
@@ -69,7 +70,7 @@ model.mask_filler('sen tam bir [MASK]')
 #   'sequence': 'sen tam bir kaltak'}]
 ```
 
-As you can see it fills the [MASK] token by pretty offensive content, to compare let's use it with casual NLP model, and by the way NoOffense supports hugginface model hub too!
+As you can see, it fills the [MASK] token with pretty offensive content. To compare, let's use it with a casual NLP model. By the way, NoOffense also supports Hugging Face's model hub!
 
 ```python
 from nooffense import MaskPredictor
@@ -93,12 +94,11 @@ model.mask_filler('sen tam bir [MASK]')
 #   'token_str': 'sey',
 #   'sequence': 'sen tam bir sey'}]
 ```
-You can notice it produces much less offensive content.
+As you can see, the casual NLP model produces much less offensive content than NoOffense.
 
 # Get Sentence Embeddings
 
-Sometimes you need to encode your sentences to vector form to use them in different tasks than classification. With NoOffense you can get sentence embeddings for offensive language inputs and use them for downstream tasks like sentence similarity, retrieve&rank etc.
-
+Sometimes, you need to encode your sentences in vector form to use them in different tasks than classification. With NoOffense, you can get sentence embeddings for offensive language inputs and use them for downstream tasks like sentence similarity, retrieval, and ranking, etc.
 ```python
 from nooffense import SentenceEncoder
 model = SentenceEncoder("path_to_your_model_weight_folder")
@@ -106,3 +106,13 @@ model.encode(['input_text_here'])
 
 # The code above will resuls mxn matrix where m is number of sentences given and n is dimension of encoder model.
 ```
+
+
+Speaking of sentence similarity, NoOffense library has method that helps you find most similar sentences using cosine similarity based on SentenceEncodings:
+```python
+from nooffense import SentenceEncoder
+model = SentenceEncoder("path_to_your_model_weight_folder")
+model.find_most_similar("bir küfürlü içerik", ["text1", "text2", ..., "text_n"])
+```
+The code above will result sorted dictionary starting with most similar text given from list of strings.
+# Team
