@@ -11,6 +11,10 @@ To install this package, simply run the following command in your Python environ
 pip install git+https://github.com/ertugrul-dmr/NoOffense.git
 ```
 This command will install the package directly from the GitHub repository.
+
+**PyTorch with CUDA**
+
+If you wish to use a GPU / CUDA, you must install PyTorch with the matching CUDA Version.
 # Usage
 
 NoOffense is a versatile tool that supports multiple standard NLP tasks, with a particular focus on detecting offensive language in Turkish texts.
