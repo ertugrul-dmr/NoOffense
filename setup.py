@@ -5,17 +5,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='no-offense',
-    version='0.0.1',
+    version='0.0.3',
     author='ertugrul',
     author_email='',
-    description='Testing installation of Package',
-    #long_description=long_description,
-    #long_description_content_type="text/markdown",
+    description='A smart and fast offensive language detection tool for Turkish',
     url='https://github.com/ertugrul-dmr/NoOffense',
     project_urls = {
         "Bug Tracker": "https://github.com/ertugrul-dmr/NoOffense/issues"
     },
     license='Apache',
-    packages=['nooffense'],
-    #install_requires=['string', 're'],
+    packages=['nooffense']
 )
