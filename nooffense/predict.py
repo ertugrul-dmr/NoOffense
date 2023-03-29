@@ -56,8 +56,12 @@ class DFPredictor:
                                                                        ).to(self.device)
             model.eval()
             for encoding in tqdm(dataloader, disable=not progress_bar):
-                output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
-                    self.device), encoding['token_type_ids'].to(self.device))
+                try:
+                    output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
+                        self.device), encoding['token_type_ids'].to(self.device))
+                except:
+                    output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
+                        self.device))
                 predictions.append(output.logits.detach().cpu())
             final_preds.append(torch.softmax(torch.cat(predictions), dim=-1))
         final_preds = np.average((torch.stack(final_preds)).numpy(), axis=0, weights=self.weights)
@@ -111,8 +115,12 @@ class Predictor:
                                                                        ).to(self.device)
             model.eval()
             for encoding in tqdm(dataloader, disable=not progress_bar):
-                output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
-                    self.device), encoding['token_type_ids'].to(self.device))
+                try:
+                    output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
+                        self.device), encoding['token_type_ids'].to(self.device))
+                except:
+                    output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
+                        self.device))
                 predictions.append(output.logits.detach().cpu())
             final_preds.append(torch.softmax(torch.cat(predictions), dim=-1))
         probas = np.average((torch.stack(final_preds)).numpy(), axis=0, weights=self.weights)

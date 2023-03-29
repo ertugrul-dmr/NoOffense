@@ -50,9 +50,12 @@ class SentenceEncoder:
                                                                    ).to(self.device)
         model.eval()
         for encoding in tqdm(dataloader, disable=not progress_bar):
-            output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
-                self.device), encoding['token_type_ids'].to(self.device))
-
+            try:
+                output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
+                    self.device), encoding['token_type_ids'].to(self.device))
+            except:
+                output = model(encoding['input_ids'].to(self.device), encoding['attention_mask'].to(
+                    self.device))
 
             mean_pool = self.pool(output.last_hidden_state, encoding['attention_mask'].to(
                 self.device))
