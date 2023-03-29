@@ -13,24 +13,26 @@ os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 
 
 class DFPredictor:
-    def __init__(self, model_path: str, device: str = 'cuda', ensemble=True):
+    def __init__(self, model_path, device: str = 'cpu', weights=None):
 
         self.id2label = {0: 'INSULT', 1: 'OTHER',
                          2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
         self.label2id = {v: k for k, v in self.id2label.items()}
-        if ensemble:
-            self.models = glob.glob(model_path + "/*", recursive=False)
+        if isinstance(model_path, list):
+            self.models = model_path
         else:
             self.models = [model_path]
         self.device = device
 
-    def predict_df(self, df_path: str, save_csv=False, progress_bar=True):
+        self.weights = weights
+
+    def predict_df(self, df_path: str, max_len=64, batch_size=8, save_csv=False, progress_bar=True):
 
         print(
             f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
 
         data = pd.read_csv(df_path, sep='|')
-        data['text'] = self.data['text'].apply(
+        data['text'] = data['text'].apply(
             lambda x: quick_clean(x))
 
 
@@ -38,11 +40,11 @@ class DFPredictor:
         for model_name in self.models:
             print(f"\n\t Predicting for {model_name}")
             tokenizer = AutoTokenizer.from_pretrained(model_name)
-            dataset = PredictDataset(data, tokenizer, max_len=64)
+            dataset = PredictDataset(data, tokenizer, max_len=max_len)
             data_collator = DataCollatorWithPadding(
                 tokenizer, padding="longest")
             dataloader = DataLoader(
-                dataset, batch_size=8, shuffle=False, collate_fn=data_collator)
+                dataset, batch_size=batch_size, shuffle=False, collate_fn=data_collator)
             predictions = []
             model = AutoModelForSequenceClassification.from_pretrained(model_name,
                                                                        problem_type="single_label_classification",
@@ -58,7 +60,7 @@ class DFPredictor:
                     self.device), encoding['token_type_ids'].to(self.device))
                 predictions.append(output.logits.detach().cpu())
             final_preds.append(torch.softmax(torch.cat(predictions), dim=-1))
-        final_preds = np.mean((torch.stack(final_preds)).numpy(), axis=0)
+        final_preds = np.average((torch.stack(final_preds)).numpy(), axis=0, weights=self.weights)
         new_df = data.copy()
         new_df['is_offensive'] = 0
         new_df.loc[:, "target"] = np.argmax(final_preds, axis=-1)
@@ -70,18 +72,20 @@ class DFPredictor:
 
 
 class Predictor:
-    def __init__(self, model_path: str, device: str = 'cuda', ensemble=False):
+    def __init__(self, model_path, device: str = 'cpu', weights=None):
 
         self.id2label = {0: 'INSULT', 1: 'OTHER',
                          2: 'PROFANITY', 3: 'RACIST', 4: 'SEXIST'}
         self.label2id = {v: k for k, v in self.id2label.items()}
-        if ensemble:
-            self.models = glob.glob(model_path + "/*", recursive=False)
+        if isinstance(model_path, list):
+            self.models = model_path
         else:
             self.models = [model_path]
         self.device = device
 
-    def predict(self, texts: list, progress_bar=False):
+        self.weights = weights
+
+    def predict(self, texts: list, max_len=64, batch_size=8,  progress_bar=False):
         print(
             f"Predicting for given model weights:\n\tTotal Number of Models: {len(self.models)}")
 
@@ -91,11 +95,11 @@ class Predictor:
         for model_name in self.models:
             print(f"\n\t Predicting for {model_name}")
             tokenizer = AutoTokenizer.from_pretrained(model_name)
-            dataset = PredictDataset(data, tokenizer, max_len=64)
+            dataset = PredictDataset(data, tokenizer, max_len=max_len)
             data_collator = DataCollatorWithPadding(
                 tokenizer, padding="longest")
             dataloader = DataLoader(
-                dataset, batch_size=8, shuffle=False, collate_fn=data_collator)
+                dataset, batch_size=batch_size, shuffle=False, collate_fn=data_collator)
             predictions = []
             model = AutoModelForSequenceClassification.from_pretrained(model_name,
                                                                        problem_type="single_label_classification",
@@ -111,7 +115,7 @@ class Predictor:
                     self.device), encoding['token_type_ids'].to(self.device))
                 predictions.append(output.logits.detach().cpu())
             final_preds.append(torch.softmax(torch.cat(predictions), dim=-1))
-        probas = np.mean((torch.stack(final_preds)).numpy(), axis=0)
+        probas = np.average((torch.stack(final_preds)).numpy(), axis=0, weights=self.weights)
         predictions = np.argmax(probas, axis=-1)
         predicted_labels = [self.id2label[i] for i in predictions]
         return {"probas": probas, "predictions": predictions, "predicted_labels": predicted_labels}

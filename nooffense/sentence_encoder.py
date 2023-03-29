@@ -29,7 +29,7 @@ class MeanPooling(torch.nn.Module):
         return mean_embeddings
 
 class SentenceEncoder:
-    def __init__(self, model_path: str, device: str = 'cuda'):
+    def __init__(self, model_path: str, device: str = 'cpu'):
         self.model = model_path
         self.device = device
         self.pool = MeanPooling()
