@@ -1,11 +1,17 @@
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AutoModel, AutoTokenizer, DataCollatorWithPadding
 from .utils import quick_clean, PredictDataset
 
+import numpy as np
+from numpy.linalg import norm
+
 import os
+
+from transformers import logging
+
+logging.set_verbosity_error()
 
 os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 
@@ -55,3 +61,38 @@ class SentenceEncoder:
             predictions.append(mean_pool.detach().cpu())
         encodings = np.concatenate(predictions, axis=0)
         return encodings
+
+    def pair_similarity(self, text_1, text_2):
+
+        cossims = []
+        pairs = []
+        for t1, t2 in zip(text_1, text_2):
+            text_1_emb = self.encode([t1])[0]
+            text_2_emb = self.encode([t2])[0]
+            cos = self._cos_sim(text_1_emb, text_2_emb)
+            cossims.append(cos)
+            pairs.append((t1,t2))
+        data_dict= dict(zip(pairs, cossims))
+        return data_dict
+
+    def _cos_sim(self, A, B):
+        cosine = np.dot(A, B) / (norm(A) * norm(B))
+        return cosine
+
+    def find_most_similar(self, input_text, text_to_look):
+        input_embed = self.encode([input_text])[0]
+
+        texts = []
+        cossims = []
+
+        for text in text_to_look:
+            text_embed = self.encode([text])[0]
+            cos = self._cos_sim(input_embed, text_embed)
+
+            texts.append(text)
+            cossims.append(cos)
+
+        data_dict = dict(zip(texts, cossims))
+        sorted_dict = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)
+        return sorted_dict
+

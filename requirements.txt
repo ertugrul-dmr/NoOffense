@@ -1,5 +1,6 @@
-pandas==1.5.3
-setuptools==65.6.3
-torch==2.0.0+cu117
-tqdm==4.65.0
-transformers==4.27.2
+torch>=2.0.0
+transformers>=4.6.0,<5.0.0
+pandas
+setuptools
+tqdm
+
