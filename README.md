@@ -117,4 +117,8 @@ model.find_most_similar("bir küfürlü içerik", ["text1", "text2", ..., "text_
 The code above will result sorted dictionary starting with most similar text given from list of strings.
 # Team
 
-![](https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/team_logov1.png?raw=true)
+
+
+<p align="center">
+  <img src="https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/team_logov1.png?raw=true" alt="">
+</p>
