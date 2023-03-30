@@ -126,3 +126,8 @@ The code above will result sorted dictionary starting with most similar text giv
 <p align="center">
   <img src="https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/team_logov1.png?raw=true" alt="">
 </p>
+
+Team Members:
+- [Ertuğrul Demir](https://github.com/ertugrul-dmr)
+- [Askar Bozcan](https://github.com/askarbozcan)
+- [Ayber İmir](https://github.com/ayberkimir)
