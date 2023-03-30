@@ -7,6 +7,9 @@ import pandas as pd
 
 class PredictDataset(torch.utils.data.Dataset):
     def __init__(self, data, tokenizer, max_len=64):
+        """
+        A PyTorch dataloader to load and process data in batch for transformer models.
+        """
         self.data = data
         self.tokenizer = tokenizer
         self.max_len = max_len
@@ -104,7 +107,8 @@ class TextProcessor:
     def clean_text(self, text, remove_hash_ment=True, remove_html=True, remove_emoji=True, remove_url=True,
                    remove_punct=True, remove_single_chars=True, lowercase=False, remove_digits=False) -> str:
         """
-        This is a wrapper method that applies multiple cleaning operations on the input text, based on the provided boolean arguments, and returns the cleaned text.:
+        This is a wrapper method that applies multiple cleaning operations on the input text,
+         based on the provided boolean arguments, and returns the cleaned text.
         """
 
         if remove_hash_ment:
@@ -135,6 +139,10 @@ class TextProcessor:
 
 
 def quick_clean(text):
+    """
+    A utility function to get given text to pretrain standards.
+    """
     cleaner = TextProcessor()
-    cleaned_text = cleaner.clean_text(text, remove_url=False, remove_html=False, remove_emoji=False, remove_punct=True, remove_digits=False, remove_hash_ment=False, remove_single_chars=True)
+    cleaned_text = cleaner.clean_text(text, remove_url=False, remove_html=False, remove_emoji=False, remove_punct=True,
+                                      remove_digits=False, remove_hash_ment=False, remove_single_chars=True)
     return cleaned_text

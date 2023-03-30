@@ -17,6 +17,10 @@ os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = 'true'
 
 
 class MeanPooling(torch.nn.Module):
+    """
+    This class defines a PyTorch module that implements mean pooling over the input embeddings.
+    The `forward` method takes in `last_hidden_state` and `attention_mask` as inputs and returns the mean-pooled embeddings.
+    """
     def __init__(self):
         super(MeanPooling, self).__init__()
 
@@ -29,11 +33,19 @@ class MeanPooling(torch.nn.Module):
         return mean_embeddings
 
 class SentenceEncoder:
+    """
+    This class provides a sentence encoder that utilizes a pre-trained Transformer model to encode
+    input text into dense vector representations.
+    """
     def __init__(self, model_path: str, device: str = 'cpu'):
         self.model = model_path
         self.device = device
         self.pool = MeanPooling()
     def encode(self, texts: list, progress_bar=False):
+
+        """
+        Encodes a list of input texts into dense vector representations using the pre-trained Transformer model.
+        """
 
         data = [quick_clean(text) for text in texts]
         tokenizer = AutoTokenizer.from_pretrained(self.model)
@@ -66,6 +78,9 @@ class SentenceEncoder:
         return encodings
 
     def pair_similarity(self, text_1, text_2):
+        """
+        Calculates the cosine similarity between each pair of texts in text_1 and text_2.
+        """
 
         cossims = []
         pairs = []
@@ -79,10 +94,16 @@ class SentenceEncoder:
         return data_dict
 
     def _cos_sim(self, A, B):
+        """
+        Calculates the cosine similarity between two vectors A and B.
+        """
         cosine = np.dot(A, B) / (norm(A) * norm(B))
         return cosine
 
     def find_most_similar(self, input_text, text_to_look):
+        """
+        Finds the text in text_to_look that is most similar to input_text based on cosine similarity.
+        """
         input_embed = self.encode([input_text])[0]
 
         texts = []
