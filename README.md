@@ -22,7 +22,7 @@ NoOffense is a versatile tool that supports multiple standard NLP tasks, with a 
 # Getting Predictions
 You can easily obtain predictions for a list of texts by using NoOffense as follows:
 ```python
-from noofense import Predictor
+from nooffense import Predictor
 
 # Predictor applies some text cleaning&preps internally
 # In case of multiple trained models use list of model paths,
@@ -41,7 +41,7 @@ NoOffense also supports making predictions on Pandas dataframes:
 
 It expects a column named "text" to make predictions.
 ```python
-from noofense import DFPredictor
+from nooffense import DFPredictor
 
 clf = DFPredictor(model_path='path_to_your_model_weights_folder', device='cpu')
 predicted_df = clf.predict_df(df_path="path_to_your_csv_file", save_csv=False, progress_bar=True)
