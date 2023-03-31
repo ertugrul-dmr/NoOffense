@@ -1,5 +1,5 @@
 # NoOffense
-This package provides a smart and fast offensive language detection tool for Turkish, which is based on the transformers technology.
+NoOffense provides a smart and fast tool for detecting offensive language in Turkish. It utilizes transformers and mostly relies on the [Hugging Face](https://huggingface.co/) library, making it fully compatible with it.
 
 The **Overfit-GM** team developed this package as a part of the **Türkiye Açık Kaynak Platformu** NLP challenge.
 
@@ -30,7 +30,7 @@ from nooffense import Predictor
 # you can use gpu support by setting device for faster inference
 
 clf = Predictor(model_path='path_to_your_model_weight_folder', device='cuda')
-predictions= clf.predict(['sen ne gerizekalısın ya'], progress_bar=False)
+predictions = clf.predict(['sen ne gerizekalısın ya'], progress_bar=False)
 
 # Code above will return dict contains these keys:
 # ['probas']: probabilities of each class
