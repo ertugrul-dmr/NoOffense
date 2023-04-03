@@ -18,15 +18,5 @@ setuptools.setup(
     },
     license="Apache License 2.0",
     packages=setuptools.find_packages(),
-    python_requires=">=3.6.0",
-    install_requires=[
-        "torch>=2.0.0"
-        "transformers>=4.6.0,<5.0.0"
-        "pandas"
-        "tqdm"
-        "numpy"
-        "sentencepiece",
-        "huggingface-hub>=0.4.0"
-
-    ],
+    python_requires=">=3.6.0"
 )
