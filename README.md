@@ -12,6 +12,12 @@ pip install git+https://github.com/ertugrul-dmr/NoOffense.git
 ```
 This command will install the package directly from the GitHub repository.
 
+**Important:** Depending on your environment you might need to install dependencies. You can use requirements.txt file shared in repository by following steps:
+- Locate the directory where requirements.txt located
+- Run: pip install -r requirements.txt
+
+And you are all set!
+
 **PyTorch with CUDA**
 
 If you wish to use a GPU / CUDA, you must install PyTorch with the matching CUDA Version.
