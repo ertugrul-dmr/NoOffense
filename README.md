@@ -155,7 +155,7 @@ The multiclass evaluation results show the precision, recall, and F1-score for e
 ### Confusion Matrix
 
 <p align="left">
-  <img src="https://raw.githubusercontent.com/ertugrul-dmr/NoOffense/master/docs/img/confusion_matrix.png?token=GHSAT0AAAAAAB3WJKN7SRIMB5TFF3PE6BIWZBMNCFA" alt="">
+  <img src="https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/confusion_matrix.png?raw=true" alt="">
 </p>
 
 ### Binary Evaluation Results
