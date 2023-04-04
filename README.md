@@ -25,6 +25,12 @@ If you wish to use a GPU / CUDA, you must install PyTorch with the matching CUDA
 
 NoOffense is a versatile tool that supports multiple standard NLP tasks, with a particular focus on detecting offensive language in Turkish texts.
 
+We have a Hugging Face space dedicated to pretrained models for this task. Our space contains a wide variety of models trained specifically for detecting offensive language in Turkish text. You can choose the model that best suits your needs from our selection:
+
+[**Model Hub Page**](https://huggingface.co/Overfit-GM)
+
+Most of our models are based on the works of [BertTurk](https://github.com/stefan-it/turkish-bert), which we have adapted for detecting offensive language in Turkish text using domain adaptation techniques. We accomplished this by applying Whole Word Masking pretraining objective on a domain-specific corpus in a semi supervised fashion.
+
 # Getting Predictions
 You can easily obtain predictions for a list of texts by using NoOffense as follows:
 ```python
@@ -125,9 +131,39 @@ model = SentenceEncoder("path_to_your_model_weight_folder")
 model.find_most_similar("bir küfürlü içerik", ["text1", "text2", ..., "text_n"])
 ```
 The code above will result sorted dictionary starting with most similar text given from list of strings.
+
+# Evaluation Results
+
+The results below were collected by using out of fold predictions, for evaluation we used 5 folds stratified by targets.
+The evaluation results below were generated using 5-fold stratified out-of-fold predictions. We provide both multiclass and binary evaluation metrics.
+
+### Multiclass Evaluation Results
+
+The multiclass evaluation results show the precision, recall, and F1-score for each class, as well as the overall macro and weighted average metrics. 
+
+|     | precision | recall | f1-score | support |
+| --- | --------- | ------ | -------- | ------- |
+| INSULT | 0.94 | 0.95 | 0.94 | 2393 |
+| OTHER | 0.98 | 0.97 | 0.98 | 3584 |
+| PROFANITY | 0.97 | 0.97 | 0.97 | 2376 |
+| RACIST | 0.98 | 0.98 | 0.98 | 2033 |
+| SEXIST | 0.98 | 0.98 | 0.98 | 2081 |
+| accuracy | | | 0.97 | 12467 |
+| macro avg | 0.97 | 0.97 | 0.97 | 12467 |
+| weighted avg | 0.97 | 0.97 | 0.97 | 12467 |
+
+### Binary Evaluation Results
+The binary evaluation results show the precision, recall, and F1-score for two classes: 'offensive' and 'not_offensive'.
+
+|              | precision | recall | f1-score | support |
+| ------------ | --------- | ------ | -------- | ------- |
+| not_offensive | 0.98 | 0.97 | 0.98 | 3584 |
+| offensive     | 0.99 | 0.99 | 0.99 | 8883 |
+| accuracy      | | | 0.99 | 12467 |
+| macro avg     | 0.99 | 0.98 | 0.98 | 12467 |
+| weighted avg  | 0.99 | 0.99 | 0.99 | 12467 |
+
 # Team
-
-
 
 <p align="center">
   <img src="https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/team_logov1.png?raw=true" alt="">
@@ -137,3 +173,6 @@ Team Members:
 - [Ertuğrul Demir](https://github.com/ertugrul-dmr)
 - [Askar Bozcan](https://github.com/askarbozcan)
 - [Ayber İmir](https://github.com/ayberkimir)
+
+
+
