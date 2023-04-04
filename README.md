@@ -152,6 +152,12 @@ The multiclass evaluation results show the precision, recall, and F1-score for e
 | macro avg | 0.97 | 0.97 | 0.97 | 12467 |
 | weighted avg | 0.97 | 0.97 | 0.97 | 12467 |
 
+### Confusion Matrix
+
+<p align="left">
+  <img src="https://raw.githubusercontent.com/ertugrul-dmr/NoOffense/master/docs/img/confusion_matrix.png?token=GHSAT0AAAAAAB3WJKN7SRIMB5TFF3PE6BIWZBMNCFA" alt="">
+</p>
+
 ### Binary Evaluation Results
 The binary evaluation results show the precision, recall, and F1-score for two classes: 'offensive' and 'not_offensive'.
 
