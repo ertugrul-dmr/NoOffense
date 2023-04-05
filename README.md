@@ -139,7 +139,7 @@ The evaluation results below were generated using 5-fold stratified out-of-fold 
 
 ### Multiclass Evaluation Results
 
-The multiclass evaluation results show the precision, recall, and F1-score for each class, as well as the overall macro and weighted average metrics. 
+The multiclass evaluation results show the precision, recall, and F1-score for each class, as well as the overall macro and weighted average metrics. These are final results of model ensembling.
 
 |     | precision | recall | f1-score | support |
 | --- | --------- | ------ | -------- | ------- |
@@ -158,8 +158,29 @@ The multiclass evaluation results show the precision, recall, and F1-score for e
   <img src="https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/confusion_matrix.png?raw=true" alt="">
 </p>
 
+### Single Model Evaluation Results
+
+Without ensembling the model results are:
+
+| Transformer Architecture | F-1 Macro Score |
+|--------------------------|----------------|
+| bert-base-turkish-cased | 0.9617 |
+| bert-base-turkish-uncased | 0.9560 |
+| bert-base-turkish-128k-cased | 0.9596 |
+| bert-base-turkish-128k-uncased | 0.9548 |
+| convbert-base-turkish-mc4-cased | 0.9609 |
+| convbert-base-turkish-mc4-uncased | 0.9537 |
+| convbert-base-turkish-cased | 0.9602 |
+| distilbert-base-turkish-cased | 0.9503 |
+| electra-base-turkish-cased-discriminator | 0.9620 |
+| electra-base-turkish-mc4-cased-discriminator | 0.9603 |
+| electra-base-turkish-mc4-uncased-discriminator | 0.9551 |
+| xlm-roberta-large | 0.9529 |
+| microsoft/mdeberta-v3-base | 0.9517 |
+
+
 ### Binary Evaluation Results
-The binary evaluation results show the precision, recall, and F1-score for two classes: 'offensive' and 'not_offensive'.
+The binary evaluation results show the precision, recall, and F1-score for two classes: 'offensive' and 'not_offensive'. These are final results of model ensembling.
 
 |              | precision | recall | f1-score | support |
 | ------------ | --------- | ------ | -------- | ------- |
@@ -168,6 +189,7 @@ The binary evaluation results show the precision, recall, and F1-score for two c
 | accuracy      | | | 0.99 | 12467 |
 | macro avg     | 0.99 | 0.98 | 0.98 | 12467 |
 | weighted avg  | 0.99 | 0.99 | 0.99 | 12467 |
+
 
 # Team
 
