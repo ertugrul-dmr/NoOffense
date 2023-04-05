@@ -29,6 +29,12 @@ We have a Hugging Face space dedicated to pretrained models for this task. Our s
 
 [**Model Hub Page**](https://huggingface.co/Overfit-GM)
 
+
+<p align="center">
+  <img src="https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/img/Animation.gif?raw=true" alt="">
+</p>
+
+
 Most of our models are based on the works of [BertTurk](https://github.com/stefan-it/turkish-bert), which we have adapted for detecting offensive language in Turkish text using domain adaptation techniques. We accomplished this by applying Whole Word Masking pretraining objective on a domain-specific corpus in a semi supervised fashion.
 
 # Getting Predictions
