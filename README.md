@@ -200,7 +200,7 @@ The binary evaluation results show the precision, recall, and F1-score for two c
 Team Members:
 - [Ertuğrul Demir](https://github.com/ertugrul-dmr)
 - [Askar Bozcan](https://github.com/askarbozcan)
-- [Ayber İmir](https://github.com/ayberkimir)
+- [Ayberk İmir](https://github.com/ayberkimir)
 
 
 
