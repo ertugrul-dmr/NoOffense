@@ -25,6 +25,12 @@ If you wish to use a GPU / CUDA, you must install PyTorch with the matching CUDA
 
 NoOffense is a versatile tool that supports multiple standard NLP tasks, with a particular focus on detecting offensive language in Turkish texts.
 
+To getting started you can take a look at our notebook, and try it yourself online by clicking colab link:
+
+| Notebook                                                                                                 | Description             |   |
+|:---------------------------------------------------------------------------------------------------------|:------------------------|:-------------|
+| [Getting Started](https://github.com/ertugrul-dmr/NoOffense/blob/master/docs/notebooks/getting_started.ipynb)                                                                    | A quick tour to library |[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1RND6F2wjDxfMxX5t7TvEPhfDDse6Hj-R?usp=sharing)|
+
 We have a Hugging Face space dedicated to pretrained models for this task. Our space contains a wide variety of models trained specifically for detecting offensive language in Turkish text. You can choose the model that best suits your needs from our selection:
 
 [**Model Hub Page**](https://huggingface.co/Overfit-GM)
@@ -47,7 +53,8 @@ from nooffense import Predictor
 # and NoOffense will yield ensemble results internally
 # you can use gpu support by setting device for faster inference
 
-clf = Predictor(model_path='path_to_your_model_weight_folder', device='cuda')
+# you can replace the model_path argument from huggingface hub link or local model weight file path
+clf = Predictor(model_path='Overfit-GM/bert-base-turkish-128k-cased-offensive', device='cuda')
 predictions = clf.predict(['sen ne gerizekalısın ya'], progress_bar=False)
 
 # Code above will return dict contains these keys:
@@ -61,7 +68,8 @@ It expects a column named "text" to make predictions.
 ```python
 from nooffense import DFPredictor
 
-clf = DFPredictor(model_path='path_to_your_model_weights_folder', device='cpu')
+# you can replace the model_path argument from huggingface hub link or local model weight file path
+clf = DFPredictor(model_path='Overfit-GM/bert-base-turkish-128k-cased-offensive', device='cpu')
 predicted_df = clf.predict_df(df_path="path_to_your_csv_file", save_csv=False, progress_bar=True)
 # Code above will return a copy of original dataframe with predictions.
 ```
@@ -71,7 +79,7 @@ predicted_df = clf.predict_df(df_path="path_to_your_csv_file", save_csv=False, p
 NoOffense models are trained in a self-supervised fashion using a large Turkish offensive text corpus. These models are then fine-tuned for text classification tasks. However, as a byproduct of our Masked Language Model training, you can also use it as a fill-mask pipe!
 ```python
 from nooffense import MaskPredictor
-model = MaskPredictor("path_to_your_model_weight_folder")
+model = MaskPredictor("Overfit-GM/bert-base-turkish-128k-uncased-offensive-mlm")
 model.mask_filler('sen tam bir [MASK]')
 # output:
 # [{'score': 0.26599952578544617,
@@ -123,7 +131,7 @@ As you can see, the casual NLP model produces much less offensive content than N
 Sometimes, you need to encode your sentences in vector form to use them in different tasks than classification. With NoOffense, you can get sentence embeddings for offensive language inputs and use them for downstream tasks like sentence similarity, retrieval, and ranking, etc.
 ```python
 from nooffense import SentenceEncoder
-model = SentenceEncoder("path_to_your_model_weight_folder")
+model = SentenceEncoder("Overfit-GM/electra-base-turkish-mc4-cased-discriminator-offensive")
 model.encode(['input_text_here'])
 
 # The code above will resuls mxn matrix where m is number of sentences given and n is dimension of encoder model.
@@ -133,7 +141,9 @@ model.encode(['input_text_here'])
 Speaking of sentence similarity, NoOffense library has method that helps you find most similar sentences using cosine similarity based on SentenceEncodings:
 ```python
 from nooffense import SentenceEncoder
-model = SentenceEncoder("path_to_your_model_weight_folder")
+
+# you can replace the model_path argument from huggingface hub link or local model weight file path
+model = SentenceEncoder("Overfit-GM/electra-base-turkish-mc4-cased-discriminator-offensive")
 model.find_most_similar("bir küfürlü içerik", ["text1", "text2", ..., "text_n"])
 ```
 The code above will result sorted dictionary starting with most similar text given from list of strings.
@@ -166,23 +176,23 @@ The multiclass evaluation results show the precision, recall, and F1-score for e
 
 ### Single Model Evaluation Results
 
-Without ensembling the model results are:
+Without ensembling the model results are like shown below. You can also reach the model weights from there:
 
-| Transformer Architecture | F-1 Macro Score |
-|--------------------------|----------------|
-| bert-base-turkish-cased | 0.9617 |
-| bert-base-turkish-uncased | 0.9560 |
-| bert-base-turkish-128k-cased | 0.9596 |
-| bert-base-turkish-128k-uncased | 0.9548 |
-| convbert-base-turkish-mc4-cased | 0.9609 |
-| convbert-base-turkish-mc4-uncased | 0.9537 |
-| convbert-base-turkish-cased | 0.9602 |
-| distilbert-base-turkish-cased | 0.9503 |
-| electra-base-turkish-cased-discriminator | 0.9620 |
-| electra-base-turkish-mc4-cased-discriminator | 0.9603 |
-| electra-base-turkish-mc4-uncased-discriminator | 0.9551 |
-| xlm-roberta-large | 0.9529 |
-| microsoft/mdeberta-v3-base | 0.9517 |
+| Transformer Architecture                         | F-1 Macro Score |
+|--------------------------------------------------|----------------|
+| [bert-base-turkish-cased](https:/huggingface.co/Overfit-GM/bert-base-turkish-cased-offensive)                      | 0.9617 |
+| [bert-base-turkish-uncased](https://huggingface.co/Overfit-GM/bert-base-turkish-uncased-offensive)                    | 0.9560 |
+| [bert-base-turkish-128k-cased](https://huggingface.co/Overfit-GM/bert-base-turkish-128k-cased-offensive)                   | 0.9596 |
+| [bert-base-turkish-128k-uncased](https://huggingface.co/Overfit-GM/bert-base-turkish-128k-uncased-offensive)                 | 0.9548 |
+| [convbert-base-turkish-mc4-cased](https://huggingface.co/Overfit-GM/convbert-base-turkish-mc4-cased-offensive)                | 0.9609 |
+| [convbert-base-turkish-mc4-uncased](https://huggingface.co/Overfit-GM/convbert-base-turkish-mc4-uncased-offensive)              | 0.9537 |
+| [convbert-base-turkish-cased](https://huggingface.co/Overfit-GM/convbert-base-turkish-cased-offensive)                    | 0.9602 |
+| [distilbert-base-turkish-cased](https://huggingface.co/Overfit-GM/distilbert-base-turkish-cased-offensive)                  | 0.9503 |
+| [electra-base-turkish-cased-discriminator](https://huggingface.co/Overfit-GM/electra-base-turkish-cased-discriminator-offensive)       | 0.9620 |
+| [electra-base-turkish-mc4-cased-discriminator](https://huggingface.co/Overfit-GM/electra-base-turkish-mc4-cased-discriminator-offensive)   | 0.9603 |
+| [electra-base-turkish-mc4-uncased-discriminator](https://huggingface.co/Overfit-GM/electra-base-turkish-mc4-uncased-discriminator-offensive) | 0.9551 |
+| [xlm-roberta-large](https://huggingface.co/Overfit-GM/xlm-roberta-large-turkish-offensive)                              | 0.9529 |
+| [microsoft/mdeberta-v3-base](https://huggingface.co/Overfit-GM/mdeberta-v3-base-offensive)                     | 0.9517 |
 
 
 ### Binary Evaluation Results
